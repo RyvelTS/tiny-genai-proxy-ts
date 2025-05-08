@@ -4,6 +4,7 @@ import path from 'path'; // For path manipulation
 import fs from 'fs';     // For file system operations
 import chatHandler from './api/chat';
 import { SpeedInsights } from "@vercel/speed-insights/next"
+import { validateChatRequest, chatRateLimiter } from './api/middleware';
 
 // Load environment variables from .env file (important for local dev)
 dotenv.config();
@@ -34,7 +35,7 @@ app.get('/api/test', (req, res) => {
     res.status(200).json({ message: 'GET route is working!' });
 });
 
-app.post('/api/chat', (req, res) => {
+app.post('/api/chat', chatRateLimiter, validateChatRequest, (req, res) => {
     Promise.resolve(chatHandler(req, res)).catch(err => {
         console.error('Unhandled error in /api/chat:', err);
         res.status(500).json({ error: 'Internal Server Error' });

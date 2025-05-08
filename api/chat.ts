@@ -33,22 +33,6 @@ export default async function handler(
         // Use model from env if not provided
         const effectiveModelName = modelName || process.env.GEMINI_DEFAULT_MODEL;
 
-        // Validate input
-        if (!newUserMessage || typeof newUserMessage !== 'string') {
-            return res.status(400).json({ error: 'Missing or invalid newUserMessage.' });
-        }
-        if (systemPrompt && typeof systemPrompt !== 'string') {
-            return res.status(400).json({ error: 'Invalid systemPrompt.' });
-        }
-        if (conversationHistory && !Array.isArray(conversationHistory)) {
-            return res.status(400).json({ error: 'Invalid conversationHistory.' });
-        }
-        if (conversationHistory && conversationHistory.some(
-            (msg: any) => typeof msg !== 'object' || !msg.role || !Array.isArray(msg.parts)
-        )) {
-            return res.status(400).json({ error: 'Invalid conversationHistory format.' });
-        }
-
         const genAI = new GoogleGenerativeAI(apiKey);
 
         // Flatten conversation history and system prompt into a single array of strings
@@ -86,16 +70,14 @@ export default async function handler(
             // You can inspect error.message or error.status for more details
             let userMessage = 'The AI service is temporarily unavailable. Please try again later.';
             if (error.message.toLowerCase().includes('user location is not supported')) {
-                userMessage = 'Access to the AI service is not available from your current location.';
+                userMessage = 'Sorry, this service is not available in your region';
             } else if (error.message.toLowerCase().includes('api key not valid')) {
-                userMessage = 'The API key is invalid. Please contact support.'; // This error should ideally not reach users.
+                userMessage = 'Sorry, this service is currently not available';
             } else if (error.message.toLowerCase().includes('quota exceeded')) {
-                userMessage = 'The AI service quota has been exceeded. Please try again later.';
+                userMessage = 'Sorry, this service is currently experiencing heavy traffic. Please try again later.';
             }
             return res.status(500).json({
-                error: 'Gemini API Error',
-                details: error.message,
-                userFriendlyMessage: userMessage
+                errorMessage: userMessage
             });
         } else if (error instanceof Error) {
             return res.status(500).json({ error: 'Internal Server Error', details: error.message });

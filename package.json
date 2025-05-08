@@ -14,11 +14,13 @@
   "description": "A proxy for GenAI APIs",
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
+    "@types/express-rate-limit": "^6.0.2",
     "@vercel/node": "^5.1.15",
     "@vercel/speed-insights": "^1.2.0",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
-    "express": "^5.1.0"
+    "express": "^5.1.0",
+    "express-rate-limit": "^7.5.0"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",
