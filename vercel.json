@@ -11,5 +11,9 @@
             "src": "/(.*)",
             "dest": "server.ts"
         }
+    ],
+    "regions": [
+        "sin1",
+        "hnd1"
     ]
 }
