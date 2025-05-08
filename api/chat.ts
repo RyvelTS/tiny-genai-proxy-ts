@@ -30,9 +30,7 @@ export default async function handler(
             modelName, // Model name can be overridden by frontend
         } = req.body;
 
-        // Use model from env if not provided
         const effectiveModelName = modelName || process.env.GEMINI_DEFAULT_MODEL;
-
         const genAI = new GoogleGenerativeAI(apiKey);
 
         // Flatten conversation history and system prompt into a single array of strings
@@ -67,7 +65,6 @@ export default async function handler(
     } catch (error) {
         console.error('Error calling Gemini API:', error);
         if (error instanceof GoogleGenerativeAIFetchError) {
-            // You can inspect error.message or error.status for more details
             let userMessage = 'The AI service is temporarily unavailable. Please try again later.';
             if (error.message.toLowerCase().includes('user location is not supported')) {
                 userMessage = 'Sorry, this service is not available in your region';

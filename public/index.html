@@ -2,73 +2,35 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Application Environment</title>
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            background-color: #f4f7f6;
-            color: #333;
-        }
-
-        .container {
-            text-align: center;
-            padding: 40px;
-            background-color: white;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        h1 {
-            color: #2c3e50;
-            margin-bottom: 10px;
-        }
-
-        p {
-            font-size: 1.2em;
-            color: #555;
-        }
-
-        strong {
-            font-weight: 600;
-            padding: 5px 10px;
-            border-radius: 5px;
-        }
-
-        .env-dev {
-            background-color: #e0f7fa;
-            /* Light cyan for dev */
-            color: #00796b;
-            /* Dark teal text for dev */
-        }
-
-        .env-prod {
-            background-color: #d1f2eb;
-            /* Light green for prod */
-            color: #004d40;
-            /* Dark green text for prod */
-        }
-
-        .env-unknown {
-            background-color: #ffebee;
-            /* Light red for unknown */
-            color: #c62828;
-            /* Dark red text for unknown */
-        }
-    </style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Application Status</title>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
-<body>
-    <div class="container">
-        <h1>Application Status</h1>
-        <p>Current Environment: <strong id="envValue"
-                class="{{ENVIRONMENT_CLASS_PLACEHOLDER}}">{{ENVIRONMENT_VALUE_PLACEHOLDER}}</strong></p>
+<body
+    class="bg-gradient-to-br from-slate-100 to-slate-200 min-h-screen flex items-center justify-center text-slate-800 font-sans">
+
+    <div class="bg-white max-w-md w-full rounded-2xl shadow-lg p-8 md:p-10 text-center space-y-6">
+        <h1 class="text-4xl font-extrabold text-slate-700 tracking-tight">
+            {{APP_NAME}}
+        </h1>
+        <h3 class="text-2xl font-bold capitalize font-bold text-slate-700">-- {{ENVIRONMENT_NAME}} --</h3>
+        <div class="border-t border-slate-200 my-2"></div>
+        <div>
+            <p class="text-lg font-medium text-slate-600 mb-2 capitalize">
+                Server Status:
+            </p>
+            <span class="inline-flex items-center gap-2 rounded-full px-5 py-2 text-base font-semibold shadow-sm
+             bg-green-100 text-green-700 ring-1 ring-green-200">
+                <span class="relative flex h-3 w-3">
+                    <span
+                        class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                </span>
+                Online
+            </span>
+        </div>
     </div>
 </body>
 

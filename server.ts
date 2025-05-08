@@ -6,16 +6,12 @@ import chatHandler from './api/chat';
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import { validateChatRequest, chatRateLimiter } from './api/middleware';
 
-// Load environment variables from .env file (important for local dev)
 dotenv.config();
-
 const app = express();
 app.use(express.json());
 
-// Add CORS headers to all responses and handle preflight OPTIONS requests
 app.use((req, res, next) => {
     const allowedOrigin = process.env.ALLOWED_ORIGIN;
-    console.log('CORS_ALLOW_ORIGIN:', allowedOrigin);
     if (!allowedOrigin) {
         res.sendStatus(500).json({ error: 'CORS_ALLOW_ORIGIN is not set.' });
         return;
@@ -42,47 +38,29 @@ app.post('/api/chat', chatRateLimiter, validateChatRequest, (req, res) => {
     });
 });
 
-// Route for '/' to display the environment
 app.get('/', (req, res) => {
-    const environment = process.env.ENVIRONMENT || 'unknown'; // Default to 'unknown' if not set
+    const allowedOrigin = process.env.ALLOWED_ORIGIN;
 
-    // Path to your HTML file.
-    // process.cwd() gives the root of your project where package.json is.
-    // This assumes you've created a 'public' folder in your project root
-    // and 'environment_page.html' is inside it.
-    const htmlFilePath = path.join(process.cwd(), 'public', 'index.html');
+    if (allowedOrigin) {
+        return res.redirect(302, allowedOrigin);
+    }
 
-    fs.readFile(htmlFilePath, 'utf8', (err, htmlData) => {
+    const appName = process.env.APP_NAME || 'Tiny GenAI Proxy';
+    const envName = process.env.ENVIRONMENT || 'Unknown';
+
+    const filePath = path.join(process.cwd(), 'public', 'index.html');
+    fs.readFile(filePath, 'utf8', (err, data) => {
         if (err) {
-            console.error('Error reading HTML file:', htmlFilePath, err);
-            return res.status(500).send('Error: Could not load the page template.');
+            console.error('Failed to read index.html:', err);
+            return res.status(500).send('Internal Server Error loading page.');
         }
 
-        // Determine class for styling based on environment
-        let envClass = 'env-unknown';
-        if (environment.toLowerCase() === 'dev') {
-            envClass = 'env-dev';
-        } else if (environment.toLowerCase() === 'prod') {
-            envClass = 'env-prod';
-        }
-
-        // Replace placeholders with actual values
-        // Basic XSS protection by escaping HTML special characters for the value
-        const escapedEnvironmentValue = environment
-            .replace(/&/g, "&")
-            .replace(/</g, "<")
-            .replace(/>/g, ">")
-            .replace(/"/g, "")
-            .replace(/'/g, "'");
-
-        let modifiedHtml = htmlData.replace('{{ENVIRONMENT_VALUE_PLACEHOLDER}}', escapedEnvironmentValue);
-        modifiedHtml = modifiedHtml.replace('{{ENVIRONMENT_CLASS_PLACEHOLDER}}', envClass);
-
+        let updatedHtml = data.replace(/{{APP_NAME}}/g, appName);
+        updatedHtml = updatedHtml.replace(/{{ENVIRONMENT_NAME}}/g, envName);
 
         res.setHeader('Content-Type', 'text/html');
-        res.send(modifiedHtml);
+        res.send(updatedHtml);
     });
 });
 
-// Export the Express app for Vercel
 export default app;
