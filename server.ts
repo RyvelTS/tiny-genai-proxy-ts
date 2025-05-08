@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import path from 'path'; // For path manipulation
 import fs from 'fs';     // For file system operations
 import chatHandler from './api/chat';
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 // Load environment variables from .env file (important for local dev)
 dotenv.config();
