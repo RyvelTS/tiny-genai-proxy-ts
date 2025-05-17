@@ -105,7 +105,7 @@
     "skipLibCheck": true /* Skip type checking all .d.ts files. */
   },
   "include": [
-    "api/**/*.ts" // This tells TypeScript to consider files here
+    "src/**/*.ts" // This tells TypeScript to consider files here
   ],
   "exclude": [
     "node_modules"
