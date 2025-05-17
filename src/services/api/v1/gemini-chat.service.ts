@@ -233,7 +233,7 @@ class GeminiChatService {
                 }
 
                 return {
-                    role: msg.role === 'assistant' ? 'model' : 'user', // Map 'assistant' to 'model'
+                    role: msg.role === 'assistant' ? 'assistant' : 'user', // Map 'assistant' to 'model'
                     parts: [{ text: textContent }],
                 };
             });
