@@ -7,9 +7,6 @@ import webRoutes from './src/routes/web/index';
 dotenv.config();
 const app = express();
 app.use(express.json());
-app.use('/', webRoutes);
-app.use('/api', apiRoutes);
-
 app.use((req, res, next) => {
     const allowedOrigin = process.env.ALLOWED_ORIGIN;
     if (!allowedOrigin) {
@@ -27,8 +24,7 @@ app.use((req, res, next) => {
     next();
 });
 
-app.get('/api/test', (req, res) => {
-    res.status(200).json({ message: 'GET route is working!' });
-});
+app.use('/', webRoutes);
+app.use('/api', apiRoutes);
 
 export default app;

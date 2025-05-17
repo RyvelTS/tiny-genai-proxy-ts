@@ -6,6 +6,12 @@ import fs from 'fs';
 class AppController {
     public static serveIndexPage(req: Request, res: Response, next: NextFunction): void {
         try {
+            const allowedOrigin = process.env.ALLOWED_ORIGIN;
+
+            if (allowedOrigin) {
+                return res.redirect(302, allowedOrigin);
+            }
+
             const appName = process.env.APP_NAME || 'Tiny GenAI Proxy';
             const envName = process.env.ENVIRONMENT || 'Unknown';
 
