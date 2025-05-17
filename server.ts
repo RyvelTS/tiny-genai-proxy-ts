@@ -7,6 +7,7 @@ import webRoutes from './src/routes/web/index';
 dotenv.config();
 const app = express();
 app.use(express.json());
+app.set('trust proxy', true);
 app.use((req, res, next) => {
     const allowedOrigin = process.env.ALLOWED_ORIGIN;
     if (!allowedOrigin) {

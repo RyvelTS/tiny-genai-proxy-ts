@@ -1,6 +1,18 @@
 import type { Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import rateLimit from 'express-rate-limit';
+import logger from '../../../utils/logger';
+
+// The keyGenerator function
+const ipKeyGenerator = (req: Request, _res: Response): string => {
+    if (!req.ip) {
+        logger.warn('Request IP is undefined. Rate limiting might not work as expected. Check "trust proxy" Express setting.')
+        return 'unknown_ip_for_rate_limit_key';
+    }
+
+    logger.info(req.ip)
+    return req.ip;
+};
 
 export const chatRateLimiter = rateLimit({
     windowMs: 60000, // 1 minutes
@@ -8,6 +20,7 @@ export const chatRateLimiter = rateLimit({
     message: { error: 'Too many requests, please try again later.' },
     standardHeaders: true,
     legacyHeaders: false,
+    keyGenerator: ipKeyGenerator,
 });
 
 // --- Zod schema defined here ---
@@ -40,7 +53,7 @@ export function validateChatRequest(req: Request, res: Response, next: NextFunct
             return;
         }
 
-        console.error("Unexpected error in validateChatRequest:", error);
+        logger.error("Unexpected error in validateChatRequest:", error);
         res.status(500).json({ error: 'Internal server error during validation' });
         return;
     }
