@@ -15,7 +15,7 @@ const chatRequestSchema = z.object({
     systemPrompt: z.string(),
     conversationHistory: z.array(
         z.object({
-            role: z.enum(["user", "assistant", "system"]),
+            role: z.enum(["user", "model", "function", "system"]),
             parts: z.array(z.string()).min(1, "Each 'parts' array in conversationHistory must contain at least one string."),
         })
     ).optional(),

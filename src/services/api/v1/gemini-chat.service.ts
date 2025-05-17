@@ -19,7 +19,7 @@ interface GeminiMessagePart {
 
 export interface GeminiChatRequestPayload {
     systemPrompt: string;
-    conversationHistory?: Array<{ role: "user" | "assistant" | "system"; parts: string[] }>;
+    conversationHistory?: Array<{ role: "user" | "model" | "function" | "system"; parts: string[] }>;
     newUserMessage: string;
     modelName?: string;
 }
@@ -233,7 +233,7 @@ class GeminiChatService {
                 }
 
                 return {
-                    role: msg.role === 'assistant' ? 'assistant' : 'user',
+                    role: msg.role === 'model' ? 'model' : 'user',
                     parts: [{ text: textContent }],
                 };
             });
