@@ -71,7 +71,7 @@ npm run dev
 ```
 
 The proxy will be available at:
-👉 `http://localhost:3000/api/chat`
+👉 `http://localhost:3000/api/v1/chat`
 
 ---
 
@@ -117,7 +117,7 @@ To deploy:
    ```
 
 4. After deployment, your proxy will be accessible at:
-   👉 `https://your-vercel-project.vercel.app/api/chat`
+   👉 `https://your-vercel-project.vercel.app/api/v1/chat`
 
 ---
 

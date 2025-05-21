@@ -8,7 +8,7 @@ class AppController {
         try {
             const allowedOrigin = process.env.ALLOWED_ORIGIN;
 
-            if (allowedOrigin) {
+            if (allowedOrigin && allowedOrigin !== '*') {
                 return res.redirect(302, allowedOrigin);
             }
 
