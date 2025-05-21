@@ -1,4 +1,3 @@
-// src/services/api/v2/gemini-chat.service.ts
 import {
     GoogleGenerativeAI,
     GoogleGenerativeAIFetchError,
