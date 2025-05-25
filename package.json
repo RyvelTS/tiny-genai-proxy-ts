@@ -2,7 +2,6 @@
   "name": "tiny-genai-proxy-ts",
   "version": "1.0.0",
   "main": "dist/api/chat.js",
-  "type": "module",
   "scripts": {
     "dev": "vercel dev",
     "build": "tsc",
@@ -14,7 +13,6 @@
   "license": "ISC",
   "description": "A proxy for GenAI APIs",
   "dependencies": {
-    "@google/genai": "^1.0.0",
     "@google/generative-ai": "^0.24.1",
     "@types/express-rate-limit": "^6.0.2",
     "@vercel/node": "^5.1.15",
