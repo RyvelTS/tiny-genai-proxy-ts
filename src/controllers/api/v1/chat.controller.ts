@@ -1,14 +1,13 @@
 import { Response, NextFunction } from 'express';
-import { ChatRequest } from '../../../types/api/v1/chat.request';
-import logger from '../../../utils/logger';
-import GeminiChatService from '../../../services/api/v1/gemini-chat.service';
-import { GeminiChatRequestPayload, GeminiChatServiceError } from '../../../types/gemini/gemini';
+import { ChatRequest } from '../../../types/api/v1/chat.request.js';
+import logger from '../../../utils/logger.js';
+import GeminiChatService from '../../../services/api/v1/gemini-chat.service.js';
+import { GeminiChatRequestPayload, GeminiChatServiceError } from '../../../types/gemini/gemini.js';
 
 class ChatController {
     public static async handleChatMessage(
         req: ChatRequest,
         res: Response,
-        next: NextFunction
     ): Promise<void> {
         try {
             const {
@@ -25,7 +24,7 @@ class ChatController {
                 modelName,
             };
 
-            logger.debug('User message received:', newUserMessage);
+            logger.info('User message received at (V1): ', newUserMessage);
             const response = await GeminiChatService.processChat(payload);
             res.status(200).json(response);
             return;
@@ -42,7 +41,10 @@ class ChatController {
                 });
                 return;
             } else {
-                next(error);
+                logger.error('Unexpected Error')
+                res.status(500).json({
+                    error: 'An unexpected error occurred.',
+                });
             }
         }
     }
