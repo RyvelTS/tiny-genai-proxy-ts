@@ -6,7 +6,6 @@ class GeminiChatService {
     public async processChat(payload: GeminiChatRequestPayload) {
         const { systemPrompt, newUserMessage } = payload;
         const SYSTEM_MESSAGE_TAG = "[[SYS_EVAL_RESULT]]";
-
         const evaluationResult = await GeminiService.evaluatePromptSafety(systemPrompt, newUserMessage);
         let userMessageForModel = newUserMessage;
         if (evaluationResult.isMalicious) {
