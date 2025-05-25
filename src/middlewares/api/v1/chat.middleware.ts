@@ -1,7 +1,7 @@
 import type { Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import rateLimit from 'express-rate-limit';
-import logger from '../../../utils/logger';
+import logger from '../../../utils/logger.js';
 
 // The keyGenerator function
 const ipKeyGenerator = (req: Request, _res: Response): string => {
@@ -10,7 +10,7 @@ const ipKeyGenerator = (req: Request, _res: Response): string => {
         return 'unknown_ip_for_rate_limit_key';
     }
 
-    logger.info(req.ip)
+    logger.info('Received from ' + req.ip)
     return req.ip;
 };
 

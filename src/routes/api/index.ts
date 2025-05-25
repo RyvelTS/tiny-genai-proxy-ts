@@ -1,6 +1,6 @@
 import express, { Router, Request, Response } from 'express';
-import v1ChatRouter from './v1/chat.route';
-// import v2ChatRouter from './v2/chat.route';
+import v1ChatRouter from './v1/chat.route.js';
+// import v2ChatRouter from './v2/chat.route.js';
 
 const router: Router = express.Router();
 
