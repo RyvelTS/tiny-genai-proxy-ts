@@ -37,3 +37,4 @@ class AppController {
 }
 
 export default AppController;
+// No changes needed for built-in modules like 'path' and 'fs'.
