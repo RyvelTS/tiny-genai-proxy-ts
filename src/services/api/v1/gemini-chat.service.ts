@@ -12,13 +12,13 @@ class GeminiChatService {
         if (evaluationResult.isMalicious) {
             logger.debug(payload)
             let evalResult = `${SYSTEM_MESSAGE_TAG} The previous user input was flagged as malicious. Reason: '${evaluationResult.reason}'. The original message has been withheld and will not be processed.`;
-            if (!payload.conversationHistory) {
-                payload.conversationHistory = [];
-            }
-
-            payload.conversationHistory.push({ role: 'model', parts: [evalResult] });
             logger.warn(evalResult);
-            userMessageForModel = "Why can't you help me? And how can you assist me today?";
+            if (payload.conversationHistory) {
+                payload.conversationHistory.push({ role: 'model', parts: [evalResult] });
+                userMessageForModel = "Why can't you help me? And how can you assist me today?";
+            } else {
+                userMessageForModel = evalResult
+            }
         }
 
         const aiResponseText = await GeminiService.generateText({ ...payload, newUserMessage: userMessageForModel });
