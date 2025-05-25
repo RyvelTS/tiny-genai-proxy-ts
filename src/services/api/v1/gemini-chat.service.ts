@@ -10,7 +10,6 @@ class GeminiChatService {
         const evaluationResult = await GeminiService.evaluatePromptSafety(systemPrompt, newUserMessage);
         let userMessageForModel = newUserMessage;
         if (evaluationResult.isMalicious) {
-            logger.debug(payload)
             let evalResult = `${SYSTEM_MESSAGE_TAG} The previous user input was flagged as malicious. Reason: '${evaluationResult.reason}'. The original message has been withheld and will not be processed.`;
             logger.warn(evalResult);
             if (payload.conversationHistory) {
