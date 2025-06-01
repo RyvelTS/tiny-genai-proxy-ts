@@ -121,9 +121,25 @@ To deploy:
 
 ---
 
+## 🧪 Testing
+
+This project includes comprehensive test coverage for controllers, middleware, and Gemini service logic. Tests are written with **Jest** and cover:
+
+- Controller request/response handling, including error and validation scenarios
+- Middleware input validation for chat requests
+- Gemini service integration, including prompt safety evaluation and error handling
+
+### Running tests
+
+```bash
+npm test
+```
+
+Test setup uses a `.env.test` file for environment variables. See `tests/jest.setup.ts` for details.
+
+---
+
 ## 📬 Feedback
 
 Have a feature idea or found a bug? Open an issue or reach out on GitHub!
-
----
 
