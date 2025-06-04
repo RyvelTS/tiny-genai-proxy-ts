@@ -5,6 +5,7 @@ import {
     Content,
     CreateChatParameters,
     GenerateContentConfig,
+    GenerateContentResponse,
 } from '@google/genai';
 import fs from 'fs';
 import path from 'path';
@@ -250,6 +251,122 @@ class GeminiService {
             }
 
             return response.text || "";
+        } catch (error) {
+            logger.error('Error in GeminiService.generateText:', error);
+            const parsed = this.parseGeminiApiError(error);
+            const serviceError: GeminiChatServiceError = Object.assign(new Error('Failed to generate chat response.'), {
+                isOperational: true
+            });
+            if (parsed.isLocationError) {
+                serviceError.statusCode = 403;
+                serviceError.userMessage = parsed.userMessage;
+                serviceError.message = parsed.details || parsed.userMessage || 'Service not available in your region.';
+            } else if (parsed.isQuotaError) {
+                serviceError.statusCode = 429;
+                serviceError.userMessage = parsed.userMessage;
+                serviceError.message = parsed.details || parsed.userMessage || 'Service quota exceeded.';
+            } else if (parsed.isApiKeyError) {
+                serviceError.statusCode = 500;
+                serviceError.userMessage = parsed.userMessage;
+                serviceError.message = parsed.details || parsed.userMessage || 'API key error.';
+            } else if (error instanceof Error && error.name === 'GoogleGenAIError') {
+                serviceError.statusCode = 503;
+                serviceError.message = `Gemini API Fetch Error: ${error.message}`;
+                serviceError.userMessage = 'The AI service is temporarily unavailable. Please try again later.';
+            } else if ((error as GeminiChatServiceError).isOperational) {
+                throw error;
+            } else if (error instanceof Error) {
+                serviceError.statusCode = 500;
+                serviceError.message = `Internal error: ${error.message}`;
+                serviceError.userMessage = 'An unexpected error occurred while processing your request.';
+                serviceError.isOperational = false;
+            } else {
+                serviceError.statusCode = 500;
+                serviceError.message = 'An unknown error occurred in Gemini service.';
+                serviceError.userMessage = 'An unknown error occurred.';
+                serviceError.isOperational = false;
+            }
+            throw serviceError;
+        }
+    }
+
+    public async generateResponse(payload: GeminiChatRequestPayload): Promise<any> {
+        try {
+            const { systemPrompt, conversationHistory, newUserMessage, modelName, config } = payload;
+            const baseSystemInstruction = `System Instructions: ${systemPrompt}`;
+
+            // Flatten conversation history into a single string for content prompt
+            const chatHistoryText = (conversationHistory || []).map((msg) => {
+                let textContent = '';
+                if (msg.parts?.length) {
+                    if (typeof msg.parts[0] === 'string') {
+                        textContent = msg.parts[0];
+                    } else if (typeof msg.parts[0] === 'object' && 'text' in msg.parts[0]) {
+                        textContent = (msg.parts[0] as GeminiMessagePart).text;
+                    }
+                }
+                return `${msg.role === 'model' ? 'Model' : 'User'}: ${textContent}`;
+            }).join('\n');
+
+            // Compose the full prompt for generateContent
+            const fullPrompt = newUserMessage;
+            const contentConfig: GenerateContentConfig = {
+                safetySettings: [
+                    { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_LOW_AND_ABOVE },
+                    { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_LOW_AND_ABOVE },
+                    { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_LOW_AND_ABOVE },
+                    { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_LOW_AND_ABOVE },
+                ],
+                maxOutputTokens: 200,
+                temperature: 1,
+            };
+
+            // Sanitize config: translate responseSchema to responseMimeType if needed
+            let finalConfig: GenerateContentConfig = { ...contentConfig };
+            if (config && typeof config === 'object') {
+                finalConfig = { ...contentConfig, ...config };
+                if ('responseSchema' in finalConfig && finalConfig.responseMimeType !== 'application/json') {
+                    // If responseSchema is present but responseMimeType is not 'application/json', set it to 'application/json'
+                    finalConfig.responseMimeType = 'application/json';
+                }
+            }
+
+            const response = await this.ai.models.generateContent({
+                model: modelName || this.defaultModel,
+                contents: fullPrompt,
+                config: finalConfig
+            });
+
+            let parsedResponse: GenerateContentResponse = response;
+            // If responseSchema is used, and response.text is a stringified object, parse it and return a new object
+            if (finalConfig.responseSchema && typeof response.text === 'string') {
+                try {
+                    parsedResponse = Object.assign({}, response, { text: JSON.parse(response.text) }) as GenerateContentResponse;
+                } catch (e) {
+                    logger.warn('Failed to parse response.text as JSON despite responseSchema being present.', { text: response.text });
+                }
+            }
+
+            if (parsedResponse.promptFeedback?.blockReason) {
+                const serviceError: GeminiChatServiceError = Object.assign(new Error(`Content blocked: ${parsedResponse.promptFeedback.blockReason}`), {
+                    isOperational: true,
+                    statusCode: 400,
+                    userMessage: `Your request could not be processed due to safety filters: ${parsedResponse.promptFeedback.blockReason}. Please rephrase your input.`
+                });
+                throw serviceError;
+            }
+
+            if (!parsedResponse.candidates?.length || !parsedResponse.candidates[0].content) {
+                const serviceError: GeminiChatServiceError = Object.assign(new Error('No content generated by AI model.'), {
+                    isOperational: true,
+                    statusCode: 500,
+                    userMessage: 'The AI model did not return a response. Please try again.'
+                });
+                throw serviceError;
+            }
+
+            // Return only the content (parsedResponse.text) if success
+            return parsedResponse.text;
         } catch (error) {
             logger.error('Error in GeminiService.generateText:', error);
             const parsed = this.parseGeminiApiError(error);
