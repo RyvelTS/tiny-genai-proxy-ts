@@ -1,3 +1,4 @@
+import { GenerateContentConfig } from "@google/genai";
 export interface GeminiMessagePart {
     text: string;
 }
@@ -8,7 +9,7 @@ export interface GeminiChatRequestPayload {
     newUserMessage: string;
     modelName?: string;
     // v2 extension: allow config for advanced Gemini features (e.g., tools)
-    config?: Record<string, unknown>;
+    config?: GenerateContentConfig;
 }
 
 export interface GeminiChatServiceError extends Error {
