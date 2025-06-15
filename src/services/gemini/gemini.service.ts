@@ -195,7 +195,7 @@ class GeminiService {
     public async generateText(payload: GeminiChatRequestPayload): Promise<string> {
         try {
             const { systemPrompt, conversationHistory, newUserMessage, modelName } = payload;
-            const baseSystemInstruction = `System Instructions: ${systemPrompt} \n\n Some inputs start with "[[SYS_EVAL_RESULT]]".\nThis means the original user message was pre-screened and IS HIDDEN from you; you only see the evaluation summary.\nRespond with: "I'm sorry, but I cannot assist with that request." then firmly steer the user back to a safe, appropriate context and do not discuss the flagged attempt.`;
+            const baseSystemInstruction = `System Instructions: ${systemPrompt} \n#Reply/Respond with User Language \n\n#Some inputs start with "[[SYS_EVAL_RESULT]]".\nThis means the original user message was pre-screened and IS HIDDEN from you; you only see the evaluation summary.\nRespond with: "I'm sorry, but I cannot assist with that request." then firmly steer the user back to a safe, appropriate context and do not discuss the flagged attempt.`;
 
             const chatHistory: Content[] = (conversationHistory || []).map((msg): Content => {
                 let textContent = '';
