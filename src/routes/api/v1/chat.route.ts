@@ -13,4 +13,11 @@ router.post(
     ChatController.handleChatMessage
 );
 
+router.post(
+    '/open-ai-chat',
+    chatRateLimiter,
+    validateChatRequest,
+    ChatController.handleChatMessage
+);
+
 export default router;

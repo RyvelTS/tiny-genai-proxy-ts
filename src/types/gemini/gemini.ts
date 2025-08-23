@@ -8,7 +8,6 @@ export interface GeminiChatRequestPayload {
     conversationHistory?: Array<{ role: "user" | "model" | "function" | "system"; parts: string[] }>;
     newUserMessage: string;
     modelName?: string;
-    // v2 extension: allow config for advanced Gemini features (e.g., tools)
     config?: GenerateContentConfig;
 }
 
