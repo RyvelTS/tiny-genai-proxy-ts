@@ -2,6 +2,7 @@ import type { Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import rateLimit from 'express-rate-limit';
 import logger from '../../../utils/logger.js';
+import { AiService } from '../../../services/ai-model.service.js';
 
 // The keyGenerator function
 const ipKeyGenerator = (req: Request, _res: Response): string => {
@@ -23,21 +24,31 @@ export const chatRateLimiter = rateLimit({
     keyGenerator: ipKeyGenerator,
 });
 
-// --- Zod schema defined here ---
-const chatRequestSchema = z.object({
-    model: z.string(),
-    instructions: z.string().optional(),
-    messages: z.array(
-        z.object({
-            role: z.enum(['system', 'user', 'assistant']),
-            content: z.string(),
-        })
-    ),
-    stream: z.boolean().optional(),
+// Zod schema for a single chat message
+const chatMessageSchema = z.object({
+    role: z.enum(['user', 'assistant', 'system']),
+    content: z.string({
+        required_error: "Message content is required.",
+    }).min(1, { message: "Message content cannot be empty." }),
 });
 
-export type ValidatedChatRequestBody = z.infer<typeof chatRequestSchema>;
+// Zod schema for the entire chat request body
+export const chatRequestSchema = z.object({
+    service: z.nativeEnum(AiService, {
+        errorMap: () => ({ message: 'A valid "service" is required: openai, azure, google, claude, or deepseek.' }),
+    }),
+    model: z.string({
+        required_error: "The 'model' field is required.",
+    }).min(1, { message: "The 'model' field cannot be empty." }),
+    messages: z.array(chatMessageSchema)
+        .min(1, { message: "The 'messages' field must be a non-empty array." }),
 
+    // Represents a generic JSON object for the schema.
+    schema: z.object({}).passthrough().optional(),
+});
+
+
+export type ValidatedChatRequestBody = z.infer<typeof chatRequestSchema>;
 export function validateChatRequest(req: Request, res: Response, next: NextFunction): void | Promise<void> {
     try {
         const validatedData = chatRequestSchema.parse(req.body);
