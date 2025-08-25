@@ -291,7 +291,6 @@ class GeminiService {
     public async generateResponse(payload: GeminiChatRequestPayload): Promise<any> {
         try {
             const { systemPrompt, conversationHistory, newUserMessage, modelName, config } = payload;
-            const baseSystemInstruction = `System Instructions: ${systemPrompt}`;
 
             // Flatten conversation history into a single string for content prompt
             const chatHistoryText = (conversationHistory || []).map((msg) => {
@@ -306,8 +305,6 @@ class GeminiService {
                 return `${msg.role === 'model' ? 'Model' : 'User'}: ${textContent}`;
             }).join('\n');
 
-            // Compose the full prompt for generateContent
-            const fullPrompt = newUserMessage;
             const contentConfig: GenerateContentConfig = {
                 safetySettings: [
                     { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_LOW_AND_ABOVE },
@@ -315,7 +312,6 @@ class GeminiService {
                     { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_LOW_AND_ABOVE },
                     { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_LOW_AND_ABOVE },
                 ],
-                maxOutputTokens: 200,
                 temperature: 1,
             };
 
@@ -330,7 +326,7 @@ class GeminiService {
 
             const response = await this.ai.models.generateContent({
                 model: modelName || this.defaultModel,
-                contents: fullPrompt,
+                contents: chatHistoryText,
                 config: finalConfig
             });
 
@@ -363,7 +359,7 @@ class GeminiService {
             }
 
             // Return only the content (parsedResponse.text) if success
-            return parsedResponse.text;
+            return parsedResponse;
         } catch (error) {
             logger.error('Error in GeminiService.generateText:', error);
             const parsed = this.parseGeminiApiError(error);
