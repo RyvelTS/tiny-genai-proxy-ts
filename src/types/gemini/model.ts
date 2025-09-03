@@ -12,14 +12,11 @@ export interface GeminiModelConfig {
 export interface Content {
     role?: string;
     parts?: Array<{ text: string }>;
-    // ...other Gemini Content fields
 }
 
 export interface Tool {
-    // Define according to Gemini/Google Function calling or code execution tool spec
     name: string;
     description?: string;
-    // ...other tool fields
 }
 
 export interface ToolConfig {
@@ -37,5 +34,4 @@ export interface GenerationConfig {
     responseSchema?: object;
     temperature?: number;
     maxOutputTokens?: number;
-    // ...other generation config fields
 }

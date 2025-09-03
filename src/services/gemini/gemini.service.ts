@@ -175,7 +175,6 @@ class GeminiService {
             };
         } catch (error) {
             logger.error('Error during prompt safety evaluation:', error);
-            // Enhanced error handling for Gemini API errors
             const parsed = this.parseGeminiApiError(error);
             if (parsed.isLocationError) {
                 return { isMalicious: false, reason: parsed.userMessage || 'Service not available in your region.' };
@@ -187,7 +186,6 @@ class GeminiService {
                 return { isMalicious: false, reason: parsed.userMessage || 'API key error.' };
             }
 
-            // Fallback: return generic error message or details from parser
             return { isMalicious: false, reason: parsed.details || "Prompt evaluation service error." };
         }
     }
@@ -195,7 +193,7 @@ class GeminiService {
     public async generateText(payload: GeminiChatRequestPayload): Promise<string> {
         try {
             const { systemPrompt, conversationHistory, newUserMessage, modelName } = payload;
-            const baseSystemInstruction = `System Instructions: ${systemPrompt} \n\n Some inputs start with "[[SYS_EVAL_RESULT]]".\nThis means the original user message was pre-screened and IS HIDDEN from you; you only see the evaluation summary.\nRespond with: "I'm sorry, but I cannot assist with that request." then firmly steer the user back to a safe, appropriate context and do not discuss the flagged attempt.`;
+            const baseSystemInstruction = `System Instructions: ${systemPrompt} \n#Reply/Respond with User Language \n\n#Some inputs start with "[[SYS_EVAL_RESULT]]".\nThis means the original user message was pre-screened and IS HIDDEN from you; you only see the evaluation summary.\nRespond with: "I'm sorry, but I cannot assist with that request." then firmly steer the user back to a safe, appropriate context and do not discuss the flagged attempt.`;
 
             const chatHistory: Content[] = (conversationHistory || []).map((msg): Content => {
                 let textContent = '';
@@ -293,7 +291,6 @@ class GeminiService {
     public async generateResponse(payload: GeminiChatRequestPayload): Promise<any> {
         try {
             const { systemPrompt, conversationHistory, newUserMessage, modelName, config } = payload;
-            const baseSystemInstruction = `System Instructions: ${systemPrompt}`;
 
             // Flatten conversation history into a single string for content prompt
             const chatHistoryText = (conversationHistory || []).map((msg) => {
@@ -308,8 +305,6 @@ class GeminiService {
                 return `${msg.role === 'model' ? 'Model' : 'User'}: ${textContent}`;
             }).join('\n');
 
-            // Compose the full prompt for generateContent
-            const fullPrompt = newUserMessage;
             const contentConfig: GenerateContentConfig = {
                 safetySettings: [
                     { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_LOW_AND_ABOVE },
@@ -317,7 +312,6 @@ class GeminiService {
                     { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_LOW_AND_ABOVE },
                     { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_LOW_AND_ABOVE },
                 ],
-                maxOutputTokens: 200,
                 temperature: 1,
             };
 
@@ -326,14 +320,13 @@ class GeminiService {
             if (config && typeof config === 'object') {
                 finalConfig = { ...contentConfig, ...config };
                 if ('responseSchema' in finalConfig && finalConfig.responseMimeType !== 'application/json') {
-                    // If responseSchema is present but responseMimeType is not 'application/json', set it to 'application/json'
                     finalConfig.responseMimeType = 'application/json';
                 }
             }
 
             const response = await this.ai.models.generateContent({
                 model: modelName || this.defaultModel,
-                contents: fullPrompt,
+                contents: chatHistoryText,
                 config: finalConfig
             });
 
@@ -366,7 +359,7 @@ class GeminiService {
             }
 
             // Return only the content (parsedResponse.text) if success
-            return parsedResponse.text;
+            return parsedResponse;
         } catch (error) {
             logger.error('Error in GeminiService.generateText:', error);
             const parsed = this.parseGeminiApiError(error);
@@ -401,6 +394,66 @@ class GeminiService {
                 serviceError.message = 'An unknown error occurred in Gemini service.';
                 serviceError.userMessage = 'An unknown error occurred.';
                 serviceError.isOperational = false;
+            }
+            throw serviceError;
+        }
+    }
+
+    /**
+     * Generates a chat completion using a specific API key provided for the request.
+     * This static method does NOT use the service's instance key.
+     * @param apiKey The user-provided Google GenAI API key.
+     * @param model The name of the model to use.
+     * @param messages The conversation history and new prompt.
+     * @param config The generation configuration (e.g., for JSON mode).
+     * @param systemInstruction An optional system-level instruction.
+     * @returns A promise that resolves to the generated text content.
+     */
+    public async createChatCompletionWithKey(
+        apiKey: string,
+        model: string,
+        messages: Content[],
+        config?: GenerateContentConfig,
+        systemInstruction?: string,
+    ): Promise<string> {
+        try {
+            const userAiClient = new GoogleGenAI({ apiKey });
+
+            // Use the stateless `models.generateContent`
+            // and resolve the 'getGenerativeModel' error.
+            const response = await userAiClient.models.generateContent({
+                model: model,
+                contents: messages,
+                ...(systemInstruction && { systemInstruction }),
+                ...(config && { config }),
+            });
+
+            if (response.promptFeedback?.blockReason) {
+                const serviceError: GeminiChatServiceError = Object.assign(new Error(`Content blocked: ${response.promptFeedback.blockReason}`), { isOperational: true, statusCode: 400, userMessage: `Your request could not be processed due to safety filters: ${response.promptFeedback.blockReason}. Please rephrase your input.` });
+                throw serviceError;
+            }
+
+            if (!response.candidates?.length || !response.candidates[0].content) {
+                const serviceError: GeminiChatServiceError = Object.assign(new Error('No content generated by AI model.'), { isOperational: true, statusCode: 500, userMessage: 'The AI model did not return a response. Please try again.' });
+                throw serviceError;
+            }
+
+            return response.text || "";
+
+        } catch (error) {
+            logger.error(`Error in GeminiService.createChatCompletionWithKey for model ${model}:`, error);
+            const parsed = new GeminiService().parseGeminiApiError(error);
+            const serviceError: GeminiChatServiceError = Object.assign(new Error('Failed to generate chat response.'), { isOperational: true });
+            if (parsed.isLocationError || parsed.isQuotaError || parsed.isApiKeyError) {
+                serviceError.statusCode = parsed.statusCode;
+                serviceError.userMessage = parsed.userMessage;
+                serviceError.message = parsed.details || parsed.userMessage || 'A known API error occurred.';
+            } else if ((error as GeminiChatServiceError).isOperational) {
+                throw error;
+            } else {
+                serviceError.statusCode = 500;
+                serviceError.message = error instanceof Error ? `Internal error: ${error.message}` : 'An unknown error occurred.';
+                serviceError.userMessage = 'An unexpected error occurred while processing your request.';
             }
             throw serviceError;
         }
