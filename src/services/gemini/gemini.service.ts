@@ -218,8 +218,7 @@ class GeminiService {
                     { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_LOW_AND_ABOVE },
                     { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_LOW_AND_ABOVE },
                 ],
-                maxOutputTokens: 200,
-                temperature: 1,
+                temperature: 0.9,
             }
 
             const chatParameters: CreateChatParameters = {
