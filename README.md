@@ -23,6 +23,7 @@ Ideal for developers who want to integrate multiple AI providers into their appl
 ## ✨ Features
 
 ### Core Features
+
 - 🔐 **Secure API Key Handling**: Never expose API keys in client-side code
 - 🔄 **Multi-Provider Support**: Unified interface for Google Gemini, OpenAI, Azure OpenAI, Claude, and DeepSeek
 - 🚀 **Three API Versions**: Gradual migration path with backward compatibility
@@ -30,6 +31,7 @@ Ideal for developers who want to integrate multiple AI providers into their appl
 - 💻 **TypeScript Support**: Full type safety and excellent developer experience
 
 ### v3 API Features
+
 - 🔑 **Dynamic API Keys**: Pass provider keys via request headers
 - 🧩 **JSON Schema Support**: Force structured JSON responses with schema validation
 - 📋 **Model Discovery**: List available models from each provider
@@ -37,6 +39,7 @@ Ideal for developers who want to integrate multiple AI providers into their appl
 - 🌐 **CORS Support**: Configurable CORS policies for web applications
 
 ### Deployment & Operations
+
 - ☁️ **Vercel Ready**: Zero-config deployment with serverless functions
 - 📊 **Built-in Monitoring**: Server status page with environment indicators
 - ⚙️ **Environment-Based Configuration**: Separate configs for development, testing, and production
@@ -147,30 +150,34 @@ npm start
 
 ### API Version Overview
 
-| Version | Description | Key Features |
-|---------|-------------|--------------|
-| **v1** | Basic Gemini chat | Fixed API key, simple interface, rate limiting |
-| **v2** | Enhanced Gemini chat | Additional configuration options, improved error handling |
-| **v3** | Multi-provider unified API | Dynamic API keys, JSON schema support, model discovery |
+| Version | Description                | Key Features                                              |
+| ------- | -------------------------- | --------------------------------------------------------- |
+| **v1**  | Basic Gemini chat          | Fixed API key, simple interface, rate limiting            |
+| **v2**  | Enhanced Gemini chat       | Additional configuration options, improved error handling |
+| **v3**  | Multi-provider unified API | Dynamic API keys, JSON schema support, model discovery    |
 
 ### Web Interface
 
 **GET /** - Application Status Page
+
 - Returns an HTML page showing server status and environment information
-- If `ALLOWED_ORIGIN` is set to a specific URL (not "*"), redirects to that URL
+- If `ALLOWED_ORIGIN` is set to a specific URL (not "\*"), redirects to that URL
 - Displays `APP_NAME` and `ENVIRONMENT` from environment variables
 
 ### API v1 - Basic Gemini Chat
 
 #### POST `/api/v1/chat`
+
 Basic chat endpoint for Gemini models using environment-based API key.
 
 **Headers:**
+
 ```
 Content-Type: application/json
 ```
 
 **Request Body:**
+
 ```json
 {
   "systemPrompt": "You are a helpful assistant.",
@@ -184,6 +191,7 @@ Content-Type: application/json
 ```
 
 **Response:**
+
 ```json
 {
   "response": "Why don't scientists trust atoms? Because they make up everything!"
@@ -195,14 +203,17 @@ Content-Type: application/json
 ### API v2 - Enhanced Gemini Chat
 
 #### POST `/api/v2/chat`
+
 Enhanced Gemini chat with additional configuration options.
 
 **Headers:**
+
 ```
 Content-Type: application/json
 ```
 
 **Request Body:**
+
 ```json
 {
   "systemPrompt": "You are a technical assistant specializing in programming.",
@@ -219,6 +230,7 @@ Content-Type: application/json
 ```
 
 **Response:**
+
 ```json
 {
   "response": "Here's a Python implementation of binary search...",
@@ -232,9 +244,11 @@ Content-Type: application/json
 ### API v3 - Multi-Provider Unified API
 
 #### POST `/api/v3/chat`
+
 Unified chat endpoint supporting multiple AI providers.
 
 **Headers:**
+
 ```
 Content-Type: application/json
 X-API-Key: your_provider_api_key_here
@@ -242,9 +256,10 @@ X-Azure-Endpoint: https://your-resource.openai.azure.com/ (for Azure only)
 ```
 
 **Request Body:**
+
 ```json
 {
-  "service": "openai",  // "openai", "azure", "google", "claude", "deepseek"
+  "service": "openai", // "openai", "azure", "google", "claude", "deepseek"
   "model": "gpt-4-turbo",
   "messages": [
     { "role": "system", "content": "You are a helpful assistant." },
@@ -262,6 +277,7 @@ X-Azure-Endpoint: https://your-resource.openai.azure.com/ (for Azure only)
 ```
 
 **Response:**
+
 ```json
 {
   "id": "chatcmpl-123",
@@ -272,29 +288,35 @@ X-Azure-Endpoint: https://your-resource.openai.azure.com/ (for Azure only)
 ```
 
 **Notes:**
+
 - `X-API-Key` header is required for all services
 - `X-Azure-Endpoint` is required for Azure OpenAI
 - `schema` field is optional; when provided, forces JSON response
 - `service` must be one of: `openai`, `azure`, `google`, `claude`, `deepseek`
 
 #### GET `/api/v3/models`
+
 List available models from a provider.
 
 **Query Parameters:**
+
 - `service` (required): AI service name
 - `endpoint` (optional): Azure endpoint URL (for Azure only)
 
 **Headers:**
+
 ```
 X-API-Key: your_provider_api_key_here
 ```
 
 **Example Request:**
+
 ```
 GET /api/v3/models?service=openai
 ```
 
 **Response:**
+
 ```json
 [
   {
@@ -332,6 +354,7 @@ npm run test:coverage
 ### Test Environment
 
 Tests use a separate `.env.test` file for environment variables. The test setup includes:
+
 - Mocked API calls to avoid hitting real endpoints
 - Comprehensive unit tests for all major components
 - Integration tests for API endpoints
@@ -373,6 +396,7 @@ vercel env pull .env.production
 ### 4. Access Your Deployed Application
 
 After deployment, your proxy will be accessible at:
+
 - Web Interface: `https://your-vercel-project.vercel.app`
 - API Base: `https://your-vercel-project.vercel.app/api`
 
@@ -387,15 +411,19 @@ A ready-to-use Postman collection is included in the repository at [`Tiny-GenAI-
 The collection includes the following requests:
 
 #### Web Interface
+
 - **Web Interface**: GET request to the root path (`/`) to view server status
 
 #### API v1 - Basic Gemini Chat
+
 - **API v1 - Basic Gemini Chat**: POST request to `/api/v1/chat` with simple Gemini chat
 
-#### API v2 - Enhanced Gemini Chat  
+#### API v2 - Enhanced Gemini Chat
+
 - **API v2 - Enhanced Gemini Chat**: POST request to `/api/v2/chat` with configuration options
 
 #### API v3 - Multi-Provider Chat
+
 - **API v3 - OpenAI Chat**: POST request to `/api/v3/chat` for OpenAI models
 - **API v3 - OpenAI Chat with JSON Schema**: Example with JSON schema for structured responses
 - **API v3 - Google Gemini Chat**: POST request for Google Gemini models
@@ -404,6 +432,7 @@ The collection includes the following requests:
 - **API v3 - DeepSeek Chat**: POST request for DeepSeek models
 
 #### API v3 - Model Discovery
+
 - **API v3 - List OpenAI Models**: GET request to `/api/v3/models` for OpenAI
 - **API v3 - List Google Models**: GET request for Google Gemini models
 - **API v3 - List Azure Models**: GET request for Azure OpenAI models (with endpoint parameter)
@@ -425,7 +454,7 @@ The collection includes the following requests:
    - `baseUrl`: Your server URL (`http://localhost:3000` for local, or your Vercel URL for production)
    - Provider API keys: Set the appropriate variables for each provider:
      - `openai_api_key`: Your OpenAI API key
-     - `google_api_key`: Your Google Gemini API key  
+     - `google_api_key`: Your Google Gemini API key
      - `azure_api_key`: Your Azure OpenAI API key
      - `azure_endpoint`: Your Azure OpenAI endpoint URL
      - `claude_api_key`: Your Claude API key
@@ -434,7 +463,6 @@ The collection includes the following requests:
 5. **Start testing**: Select any request, ensure environment variables are set, and send requests
 
 ---
-
 
 ## 🔧 Configuration Details
 
@@ -449,6 +477,7 @@ The server supports configurable CORS policies via the `ALLOWED_ORIGIN` environm
 ### Rate Limiting
 
 All API versions (v1, v2, and v3) include built-in rate limiting to prevent abuse:
+
 - Default limit: 5 requests per minute per IP (configurable in middleware)
 - Based on client IP address with proper proxy support
 - Customizable via middleware configuration for different deployment needs
@@ -456,6 +485,7 @@ All API versions (v1, v2, and v3) include built-in rate limiting to prevent abus
 ### Logging
 
 Logging is configured via the `LOG_LEVEL` environment variable:
+
 - `debug`: Verbose logging for development
 - `info`: Standard operational logging
 - `warn`: Warning and error messages only
@@ -472,12 +502,6 @@ Logging is configured via the `LOG_LEVEL` environment variable:
 5. Open a Pull Request
 
 Please ensure your code follows the existing style and includes appropriate tests.
-
----
-
-## 📄 License
-
-This project is licensed under the ISC License.
 
 ---
 
