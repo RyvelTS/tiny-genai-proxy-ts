@@ -1,0 +1,459 @@
+{
+  "info": {
+    "name": "Tiny GenAI Proxy API",
+    "description": "Postman collection for Tiny GenAI Proxy TS - A lightweight TypeScript proxy server for multiple AI providers",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": {
+      "major": 1,
+      "minor": 0,
+      "patch": 0
+    }
+  },
+  "item": [
+    {
+      "name": "Web Interface",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/",
+          "host": ["{{baseUrl}}"],
+          "path": [""]
+        },
+        "description": "Returns an HTML page showing server status and environment information. If ALLOWED_ORIGIN is set to a specific URL (not \"*\"), redirects to that URL."
+      },
+      "response": []
+    },
+    {
+      "name": "API v1 - Basic Gemini Chat",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"systemPrompt\": \"You are a helpful assistant.\",\n  \"conversationHistory\": [\n    { \"role\": \"user\", \"parts\": [\"Hello!\"] },\n    { \"role\": \"assistant\", \"parts\": [\"Hi there! How can I help you today?\"] }\n  ],\n  \"newUserMessage\": \"Can you tell me a joke?\",\n  \"modelName\": \"gemini-2.0-flash-exp\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/chat",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "chat"]
+        },
+        "description": "Basic chat endpoint for Gemini models using environment-based API key. Alternative endpoint: /api/v1/open-ai-chat (same functionality)."
+      },
+      "response": []
+    },
+    {
+      "name": "API v2 - Enhanced Gemini Chat",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"systemPrompt\": \"You are a technical assistant specializing in programming.\",\n  \"conversationHistory\": [\n    { \"role\": \"user\", \"parts\": [\"Explain binary search\"] }\n  ],\n  \"newUserMessage\": \"Now implement it in Python\",\n  \"modelName\": \"gemini-2.0-flash\",\n  \"config\": {\n    \"temperature\": 0.7,\n    \"maxOutputTokens\": 1000\n  }\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v2/chat",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v2", "chat"]
+        },
+        "description": "Enhanced Gemini chat with additional configuration options."
+      },
+      "response": []
+    },
+    {
+      "name": "API v3 - OpenAI Chat",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "X-API-Key",
+            "value": "{{openai_api_key}}",
+            "type": "text",
+            "description": "Your OpenAI API key"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"service\": \"openai\",\n  \"model\": \"gpt-4-turbo\",\n  \"messages\": [\n    { \"role\": \"system\", \"content\": \"You are a helpful assistant.\" },\n    { \"role\": \"user\", \"content\": \"Explain quantum computing in simple terms.\" }\n  ]\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v3/chat",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v3", "chat"]
+        },
+        "description": "Unified chat endpoint for OpenAI. Service must be one of: openai, azure, google, claude, deepseek."
+      },
+      "response": []
+    },
+    {
+      "name": "API v3 - OpenAI Chat with JSON Schema",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "X-API-Key",
+            "value": "{{openai_api_key}}",
+            "type": "text",
+            "description": "Your OpenAI API key"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"service\": \"openai\",\n  \"model\": \"gpt-4-turbo\",\n  \"messages\": [\n    { \"role\": \"system\", \"content\": \"You are a helpful assistant.\" },\n    { \"role\": \"user\", \"content\": \"Explain quantum computing in simple terms and provide 3 key points.\" }\n  ],\n  \"schema\": {\n    \"type\": \"object\",\n    \"properties\": {\n      \"explanation\": { \"type\": \"string\" },\n      \"keyPoints\": { \"type\": \"array\", \"items\": { \"type\": \"string\" }, \"minItems\": 3, \"maxItems\": 3 }\n    },\n    \"required\": [\"explanation\", \"keyPoints\"]\n  }\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v3/chat",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v3", "chat"]
+        },
+        "description": "OpenAI chat with JSON schema to force structured response. Schema field is optional."
+      },
+      "response": []
+    },
+    {
+      "name": "API v3 - Google Gemini Chat",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "X-API-Key",
+            "value": "{{google_api_key}}",
+            "type": "text",
+            "description": "Your Google Gemini API key"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"service\": \"google\",\n  \"model\": \"gemini-2.0-flash\",\n  \"messages\": [\n    { \"role\": \"system\", \"content\": \"You are a creative writing assistant.\" },\n    { \"role\": \"user\", \"content\": \"Write a short poem about artificial intelligence.\" }\n  ]\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v3/chat",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v3", "chat"]
+        },
+        "description": "Google Gemini chat endpoint. Uses the same unified interface."
+      },
+      "response": []
+    },
+    {
+      "name": "API v3 - Azure OpenAI Chat",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "X-API-Key",
+            "value": "{{azure_api_key}}",
+            "type": "text",
+            "description": "Your Azure OpenAI API key"
+          },
+          {
+            "key": "X-Azure-Endpoint",
+            "value": "{{azure_endpoint}}",
+            "type": "text",
+            "description": "Your Azure OpenAI endpoint (e.g., https://your-resource.openai.azure.com/)"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"service\": \"azure\",\n  \"model\": \"gpt-4\",\n  \"messages\": [\n    { \"role\": \"system\", \"content\": \"You are a business consultant.\" },\n    { \"role\": \"user\", \"content\": \"What are the key factors for a successful startup?\" }\n  ]\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v3/chat",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v3", "chat"]
+        },
+        "description": "Azure OpenAI chat endpoint. Requires both X-API-Key and X-Azure-Endpoint headers."
+      },
+      "response": []
+    },
+    {
+      "name": "API v3 - Claude Chat",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "X-API-Key",
+            "value": "{{claude_api_key}}",
+            "type": "text",
+            "description": "Your Claude API key"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"service\": \"claude\",\n  \"model\": \"claude-3-opus-20240229\",\n  \"messages\": [\n    { \"role\": \"system\", \"content\": \"You are a philosophy professor.\" },\n    { \"role\": \"user\", \"content\": \"What is the meaning of life according to existentialism?\" }\n  ]\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v3/chat",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v3", "chat"]
+        },
+        "description": "Claude chat endpoint. Uses Anthropic's Claude models."
+      },
+      "response": []
+    },
+    {
+      "name": "API v3 - DeepSeek Chat",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "X-API-Key",
+            "value": "{{deepseek_api_key}}",
+            "type": "text",
+            "description": "Your DeepSeek API key"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"service\": \"deepseek\",\n  \"model\": \"deepseek-chat\",\n  \"messages\": [\n    { \"role\": \"system\", \"content\": \"You are a coding assistant.\" },\n    { \"role\": \"user\", \"content\": \"Write a React component for a login form.\" }\n  ]\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v3/chat",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v3", "chat"]
+        },
+        "description": "DeepSeek chat endpoint. Uses DeepSeek models."
+      },
+      "response": []
+    },
+    {
+      "name": "API v3 - List OpenAI Models",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "X-API-Key",
+            "value": "{{openai_api_key}}",
+            "type": "text",
+            "description": "Your OpenAI API key"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v3/models?service=openai",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v3", "models"],
+          "query": [
+            {
+              "key": "service",
+              "value": "openai",
+              "description": "AI service name (openai, azure, google, claude, deepseek)"
+            }
+          ]
+        },
+        "description": "List available models from OpenAI provider."
+      },
+      "response": []
+    },
+    {
+      "name": "API v3 - List Google Models",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "X-API-Key",
+            "value": "{{google_api_key}}",
+            "type": "text",
+            "description": "Your Google Gemini API key"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v3/models?service=google",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v3", "models"],
+          "query": [
+            {
+              "key": "service",
+              "value": "google",
+              "description": "AI service name"
+            }
+          ]
+        },
+        "description": "List available models from Google Gemini provider."
+      },
+      "response": []
+    },
+    {
+      "name": "API v3 - List Azure Models",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "X-API-Key",
+            "value": "{{azure_api_key}}",
+            "type": "text",
+            "description": "Your Azure OpenAI API key"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v3/models?service=azure&endpoint={{azure_endpoint}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v3", "models"],
+          "query": [
+            {
+              "key": "service",
+              "value": "azure",
+              "description": "AI service name"
+            },
+            {
+              "key": "endpoint",
+              "value": "{{azure_endpoint}}",
+              "description": "Azure endpoint URL (required for Azure)"
+            }
+          ]
+        },
+        "description": "List available models from Azure OpenAI provider. Requires endpoint query parameter."
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string",
+      "description": "Base URL for the API. Change to your Vercel URL for production."
+    },
+    {
+      "key": "openai_api_key",
+      "value": "your_openai_api_key_here",
+      "type": "string",
+      "description": "OpenAI API key for v3 endpoints"
+    },
+    {
+      "key": "google_api_key",
+      "value": "your_google_gemini_api_key_here",
+      "type": "string",
+      "description": "Google Gemini API key for v3 endpoints"
+    },
+    {
+      "key": "azure_api_key",
+      "value": "your_azure_openai_api_key_here",
+      "type": "string",
+      "description": "Azure OpenAI API key for v3 endpoints"
+    },
+    {
+      "key": "azure_endpoint",
+      "value": "https://your-resource.openai.azure.com/",
+      "type": "string",
+      "description": "Azure OpenAI endpoint URL (e.g., https://your-resource.openai.azure.com/)"
+    },
+    {
+      "key": "claude_api_key",
+      "value": "your_claude_api_key_here",
+      "type": "string",
+      "description": "Claude API key for v3 endpoints"
+    },
+    {
+      "key": "deepseek_api_key",
+      "value": "your_deepseek_api_key_here",
+      "type": "string",
+      "description": "DeepSeek API key for v3 endpoints"
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "console.log('Tiny GenAI Proxy API Collection');",
+          "console.log('Base URL:', pm.variables.get('baseUrl'));"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "pm.test('Status code is 200', function () {",
+          "    pm.response.to.have.status(200);",
+          "});"
+        ]
+      }
+    }
+  ],
+  "auth": null
+}
